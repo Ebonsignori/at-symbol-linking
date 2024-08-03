@@ -25,6 +25,7 @@ export interface AtSymbolLinkingSettings {
 	invalidCharacterRegexFlags: string;
 
 	removeAccents: boolean;
+	keepTriggerSymbol: boolean;
 }
 
 export const DEFAULT_SETTINGS: AtSymbolLinkingSettings = {
@@ -44,6 +45,7 @@ export const DEFAULT_SETTINGS: AtSymbolLinkingSettings = {
 	invalidCharacterRegexFlags: "i",
 
 	removeAccents: true,
+	keepTriggerSymbol: false,
 };
 
 const arrayMove = <T>(array: T[], fromIndex: number, toIndex: number): void => {
@@ -421,6 +423,19 @@ export class SettingsTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.removeAccents)
 					.onChange((value: boolean) => {
 						this.plugin.settings.removeAccents = value;
+						this.plugin.saveSettings();
+					})
+			);
+		
+		// Retain @ in file name
+		new Setting(this.containerEl)
+			.setName("Retain the trigger symbol for file name")
+			.setDesc("Retain a literal <trigger symbol> at the start of the file names")
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.keepTriggerSymbol)
+					.onChange((value: boolean) => {
+						this.plugin.settings.keepTriggerSymbol = value;
 						this.plugin.saveSettings();
 					})
 			);

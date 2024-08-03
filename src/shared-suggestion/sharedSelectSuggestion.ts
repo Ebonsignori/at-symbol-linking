@@ -26,16 +26,18 @@ export async function sharedSelectSuggestion(
 			);
 		}
 
+		let filePath: string|null=null;
 		try {
-			linkFile = await app.vault.create(
-				value.obj?.filePath,
-				newNoteContents
-			);
+			if (settings.keepTriggerSymbol)
+				filePath = value.obj?.filePath.replace(/([^/]+)$/, `${settings.triggerSymbol}$1`);
+			else
+				filePath = value.obj?.filePath;
+			linkFile = await app.vault.create(filePath, newNoteContents);
 			// Update the alias to the name for displaying the @ link
 			value.obj.alias = value.obj?.query;
 		} catch (error) {
 			new Notice(
-				`Unable to create new note at path: ${value.obj?.filePath}. Please open an issue on GitHub, https://github.com/Ebonsignori/obsidian-at-symbol-linking/issues`,
+				`Unable to create new note at path: ${filePath}. Please open an issue on GitHub, https://github.com/Ebonsignori/obsidian-at-symbol-linking/issues`,
 				0
 			);
 			throw error;
@@ -48,8 +50,8 @@ export async function sharedSelectSuggestion(
 			value.obj?.filePath
 		) as TFile;
 	}
-	let alias = value.obj?.alias || "";
-	if (settings.includeSymbol) alias = `${settings.triggerSymbol}${alias || value.obj?.fileName}`;
+	let alias = settings.keepTriggerSymbol ? "" : (value.obj?.alias || "");
+	if (settings.includeSymbol && !settings.keepTriggerSymbol) alias = `${settings.triggerSymbol}${alias || value.obj?.fileName}`;
 	let linkText = app.fileManager.generateMarkdownLink(
 		linkFile,
 		currentFile?.path || "",

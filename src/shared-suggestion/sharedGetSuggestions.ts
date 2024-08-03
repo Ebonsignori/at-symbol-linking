@@ -91,12 +91,17 @@ export function sharedGetSuggestions(
 					!result.obj?.isCreateNewOption
 			);
 			const separator = settings.addNewNoteDirectory ? "/" : "";
+
+			let filePath = `${settings.addNewNoteDirectory.trim()}${separator}`
+			if (settings.keepTriggerSymbol)
+				filePath += settings.triggerSymbol
+			filePath += `${query.trim()}.md`
 			results.push({
 				obj: {
 					isCreateNewOption: true,
 					query: query,
 					fileName: "Create new note",
-					filePath: `${settings.addNewNoteDirectory.trim()}${separator}${query.trim()}.md`,
+					filePath,
 				},
 			});
 		}
