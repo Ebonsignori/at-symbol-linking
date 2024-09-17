@@ -118,7 +118,7 @@ export default class SuggestionPopup extends EditorSuggest<
 			});
 		}
 
-		// If query has more spaces alloted by the leavePopupOpenForXSpaces setting, close
+		// If query has more spaces allocated by the leavePopupOpenForXSpaces setting, close
 		if (
 			query.split(" ").length - 1 >
 				this.settings.leavePopupOpenForXSpaces ||

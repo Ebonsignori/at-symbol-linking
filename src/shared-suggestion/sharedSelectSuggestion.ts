@@ -10,8 +10,21 @@ export async function sharedSelectSuggestion(
 	value: Fuzzysort.KeysResult<fileOption>
 ): Promise<string> {
 	// When user selects "Create new note" option, create the note to link to
-	let linkFile;
+	let linkFile: TFile | undefined;
 	if (value?.obj?.isCreateNewOption) {
+		if (settings.includeSymbol) {
+			const filePath = value.obj.filePath;
+			let filePathParts = filePath.split("/");
+	
+			let fileName = filePathParts[filePathParts.length - 1];
+			fileName = settings.triggerSymbol + fileName;
+	
+			filePathParts = filePathParts.slice(0, filePathParts.length - 1);
+			filePathParts.push(fileName);
+	
+			value.obj.filePath = filePathParts.join("/");
+			console.log("Final file path:", value.obj.filePath);
+		}
 		let newNoteContents = "";
 		if (settings.addNewNoteTemplateFile) {
 			const fileTemplate = app.vault.getAbstractFileByPath(
@@ -49,7 +62,13 @@ export async function sharedSelectSuggestion(
 		) as TFile;
 	}
 	let alias = value.obj?.alias || "";
-	if (settings.includeSymbol) alias = `${settings.triggerSymbol}${alias || value.obj?.fileName}`;
+	if (settings.includeSymbolInAlias) {
+		alias = `${settings.triggerSymbol}${alias || value.obj.fileName}`;
+	} else {
+		alias = `${
+			alias || value.obj.fileName.replace(settings.triggerSymbol, "")
+		}`;
+	}
 	let linkText = app.fileManager.generateMarkdownLink(
 		linkFile,
 		currentFile?.path || "",

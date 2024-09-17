@@ -11,7 +11,10 @@ import { FileSuggest } from "./file-suggest";
 
 export interface AtSymbolLinkingSettings {
 	triggerSymbol: string;
+
 	includeSymbol: boolean;
+	includeSymbolInAlias: boolean;
+
 	limitLinkDirectories: Array<string>;
 
 	showAddNewNote: boolean;
@@ -30,7 +33,9 @@ export interface AtSymbolLinkingSettings {
 export const DEFAULT_SETTINGS: AtSymbolLinkingSettings = {
 	triggerSymbol: "@",
 	limitLinkDirectories: [],
+
 	includeSymbol: true,
+	includeSymbolInAlias: false,
 
 	showAddNewNote: false,
 	addNewNoteTemplateFile: "",
@@ -93,21 +98,27 @@ export class SettingsTab extends PluginSettingTab {
 				};
 			});
 
+		const exampleText = `E.g. [[${
+			this.plugin.settings.includeSymbol
+				? this.plugin.settings.triggerSymbol
+				: ""
+		}evan|${
+			this.plugin.settings.includeSymbolInAlias
+				? this.plugin.settings.triggerSymbol
+				: ""
+		}evan]]`;
+
 		// Begin includeSymbol option: Determine whether to include @ symbol in link
 		const includeSymbolDesc = document.createDocumentFragment();
+
 		includeSymbolDesc.append(
 			`Include the ${this.plugin.settings.triggerSymbol} symbol prefixing the final link text`,
 			includeSymbolDesc.createEl("br"),
-			includeSymbolDesc.createEl("em", {
-				text: `E.g. [${
-					this.plugin.settings.includeSymbol
-						? this.plugin.settings.triggerSymbol
-						: ""
-				}evan](./evan)`,
-			})
+			includeSymbolDesc.createEl("em", {text: exampleText})
 		);
+
 		new Setting(this.containerEl)
-			.setName(`Include ${this.plugin.settings.triggerSymbol} symbol`)
+			.setName(`Include ${this.plugin.settings.triggerSymbol} symbol in link text`)
 			.setDesc(includeSymbolDesc)
 			.addToggle((toggle) =>
 				toggle
@@ -119,6 +130,28 @@ export class SettingsTab extends PluginSettingTab {
 					})
 			);
 		// End includeSymbol option
+
+		// Begin includeSymbolInAlias option: Determine whether to include @ symbol in link alias
+		const includeSymbolInAliasDesc = document.createDocumentFragment();
+		includeSymbolInAliasDesc.append(
+			`Include the ${this.plugin.settings.triggerSymbol} symbol prefixing the final link alias text`,
+			includeSymbolInAliasDesc.createEl("br"),
+			includeSymbolInAliasDesc.createEl("em", {text: exampleText,})
+		);
+
+		new Setting(this.containerEl)
+			.setName(`Include ${this.plugin.settings.triggerSymbol} symbol in link alias`)
+			.setDesc(includeSymbolInAliasDesc)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.includeSymbolInAlias)
+					.onChange((value: boolean) => {
+						this.plugin.settings.includeSymbolInAlias = value;
+						this.plugin.saveSettings();
+						this.display();
+					})
+			);
+		// End includeSymbolInAlias option
 
 		// Begin limitLinksToFolders option: limit which folders links are sourced from
 		const ruleDesc = document.createDocumentFragment();
